@@ -23,7 +23,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Sync
@@ -55,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.components.SectionHeader
 import com.example.ui.components.StatusBadge
+import com.example.ui.screens.releases.GitHubReleaseDialog
 import com.example.ui.theme.CardBorder
 import com.example.ui.theme.CyberCyan
 import com.example.ui.theme.DangerRed
@@ -80,6 +83,7 @@ fun SettingsScreen(
     val scrollState = rememberScrollState()
 
     var showGuide by remember { mutableStateOf(false) }
+    var showReleases by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -255,6 +259,110 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        SectionHeader(title = "GitHub Releases & Updates")
+
+        // GitHub Releases Card
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("github_releases_card"),
+            colors = CardDefaults.cardColors(containerColor = DarkSurface),
+            shape = RoundedCornerShape(16.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(NeonYellow.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.NewReleases,
+                                contentDescription = null,
+                                tint = NeonYellow,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = "GitHub Official Releases",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = TextWhite
+                            )
+                            Text(
+                                text = "v1.1.0 Stable (90 FPS Stability Engine)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextGray
+                            )
+                        }
+                    }
+
+                    StatusBadge(text = "LATEST", indicatorColor = SuccessGreen)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "View published release notes, changelog history, APK binaries, and SHA-256 integrity checksums.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextGray
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = { showReleases = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = NeonYellow,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .weight(1.2f)
+                            .testTag("open_release_notes_btn")
+                    ) {
+                        Icon(Icons.Default.NewReleases, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Release Notes", fontWeight = FontWeight.Bold)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/"))
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: Throwable) {
+                            }
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = CyberCyan),
+                        shape = RoundedCornerShape(10.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.OpenInBrowser, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("GitHub Web")
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         SectionHeader(title = "App & Device Information")
 
         Card(
@@ -264,7 +372,7 @@ fun SettingsScreen(
             border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                InfoRow("Application", "90 FPS BOOSTER v1.0")
+                InfoRow("Application", "90 FPS BOOSTER v1.1.0")
                 InfoRow("Hardware Target", "${deviceInfo.brand} ${deviceInfo.model}")
                 InfoRow("Chipset", deviceInfo.socModel)
                 InfoRow("RAM Capacity", "${deviceInfo.totalRamGb.toInt()} GB LPDDR4X")
@@ -293,6 +401,10 @@ fun SettingsScreen(
 
     if (showGuide) {
         WirelessDebuggingGuideDialog(onDismiss = { showGuide = false })
+    }
+
+    if (showReleases) {
+        GitHubReleaseDialog(onDismiss = { showReleases = false })
     }
 }
 
