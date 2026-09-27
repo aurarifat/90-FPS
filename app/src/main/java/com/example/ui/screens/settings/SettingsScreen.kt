@@ -56,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.components.SectionHeader
+import com.example.ui.components.ShizukuConnectionCard
 import com.example.ui.components.StatusBadge
 import com.example.ui.screens.releases.GitHubReleaseDialog
 import com.example.ui.theme.CardBorder
@@ -94,84 +95,13 @@ fun SettingsScreen(
     ) {
         SectionHeader(title = "Shizuku ADB Integration")
 
-        // Shizuku Status Card
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("shizuku_settings_card"),
-            colors = CardDefaults.cardColors(containerColor = DarkSurface),
-            shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "Shizuku Service Status",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite
-                        )
-                        Text(
-                            text = shizukuStatus.statusMessage,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextGray
-                        )
-                    }
-
-                    StatusBadge(
-                        text = if (shizukuStatus.canExecuteAdbCommands) "Connected" else "Disconnected",
-                        indicatorColor = if (shizukuStatus.canExecuteAdbCommands) SuccessGreen else DangerRed
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = { viewModel.requestShizukuPermission() },
-                        enabled = shizukuStatus.isRunning && !shizukuStatus.isPermissionGranted,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = NeonYellow,
-                            contentColor = Color.Black,
-                            disabledContainerColor = DarkSurfaceVariant,
-                            disabledContentColor = TextGray
-                        ),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("request_shizuku_perm_button")
-                    ) {
-                        Text("Authorize", fontWeight = FontWeight.Bold)
-                    }
-
-                    OutlinedButton(
-                        onClick = { showGuide = true },
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonYellow),
-                        shape = RoundedCornerShape(10.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
-                        modifier = Modifier
-                            .weight(1.2f)
-                            .testTag("open_wireless_guide_button")
-                    ) {
-                        Icon(Icons.Default.DeveloperMode, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Wireless Guide")
-                    }
-
-                    IconButton(onClick = { viewModel.refreshHardwareInfo() }) {
-                        Icon(Icons.Default.Sync, contentDescription = "Refresh", tint = TextWhite)
-                    }
-                }
-            }
-        }
+        ShizukuConnectionCard(
+            shizukuStatus = shizukuStatus,
+            onRequestPermission = { viewModel.requestShizukuPermission() },
+            onRefreshStatus = { viewModel.refreshShizukuStatus() },
+            onOpenShizukuApp = { viewModel.openShizukuApp(context) },
+            onOpenGuide = { showGuide = true }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

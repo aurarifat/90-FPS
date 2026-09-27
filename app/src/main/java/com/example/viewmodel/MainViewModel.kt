@@ -1,6 +1,7 @@
 package com.example.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -193,7 +194,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun requestShizukuPermission() {
-        shizukuManager.requestPermission()
+        val initiated = shizukuManager.requestPermission()
+        if (!initiated) {
+            viewModelScope.launch {
+                if (!shizukuStatus.value.isRunning) {
+                    _snackbarMessage.emit("Shizuku service is not active. Open Shizuku and start Wireless Debugging.")
+                } else {
+                    _snackbarMessage.emit("Requested Shizuku authorization dialog.")
+                }
+            }
+        }
+    }
+
+    fun refreshShizukuStatus() {
+        shizukuManager.updateStatus()
+        viewModelScope.launch {
+            if (shizukuStatus.value.canExecuteAdbCommands) {
+                _snackbarMessage.emit("Shizuku connected & authorized!")
+            } else if (shizukuStatus.value.isRunning) {
+                _snackbarMessage.emit("Shizuku is running. Authorization required.")
+            } else {
+                _snackbarMessage.emit("Shizuku service pinged: Disconnected.")
+            }
+        }
+    }
+
+    fun openShizukuApp(context: Context) {
+        val launched = shizukuManager.openShizukuApp(context)
+        if (!launched) {
+            viewModelScope.launch {
+                _snackbarMessage.emit("Opening Shizuku setup...")
+            }
+        }
     }
 
     fun toggleDetectionService() {

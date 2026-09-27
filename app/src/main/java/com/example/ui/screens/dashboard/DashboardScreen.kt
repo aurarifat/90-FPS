@@ -36,10 +36,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,8 +51,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.ThermalSeverity
 import com.example.ui.components.GamingGauge
 import com.example.ui.components.SectionHeader
+import com.example.ui.components.ShizukuConnectionCard
 import com.example.ui.components.StatusBadge
 import com.example.ui.components.TelemetryCard
+import com.example.ui.screens.settings.WirelessDebuggingGuideDialog
 import com.example.ui.theme.CardBorder
 import com.example.ui.theme.CyberCyan
 import com.example.ui.theme.DangerRed
@@ -75,6 +81,8 @@ fun DashboardScreen(
     val telemetry by viewModel.livePerformance.collectAsStateWithLifecycle()
     val isDualRateLocked by viewModel.isDualRateLocked.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    var showGuide by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -380,54 +388,19 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Shizuku Setup Prompt Card (if not connected)
+        // Shizuku Connection Status Component (if not connected)
         if (!shizukuStatus.canExecuteAdbCommands) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(DarkSurface)
-                    .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
-                    .padding(16.dp)
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = NeonYellow,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Shizuku ADB Authorization Required",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = TextWhite
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "To write system display refresh rates without root, authorize Shizuku via Android Wireless Debugging.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextGray
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(
-                            onClick = onNavigateToSettings,
-                            colors = ButtonDefaults.buttonColors(containerColor = NeonYellow, contentColor = Color.Black),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.testTag("setup_shizuku_button")
-                        ) {
-                            Text("Open Shizuku Guide", fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
+            ShizukuConnectionCard(
+                shizukuStatus = shizukuStatus,
+                onRequestPermission = { viewModel.requestShizukuPermission() },
+                onRefreshStatus = { viewModel.refreshShizukuStatus() },
+                onOpenShizukuApp = { viewModel.openShizukuApp(context) },
+                onOpenGuide = { showGuide = true }
+            )
         }
+    }
+
+    if (showGuide) {
+        WirelessDebuggingGuideDialog(onDismiss = { showGuide = false })
     }
 }

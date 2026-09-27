@@ -53,30 +53,31 @@ class ShizukuManager(private val context: Context) {
     }
 
     fun updateStatus() {
-        val isInstalled = checkShizukuInstalled()
         var isRunning = false
         var isPreV11 = false
         var version = 0
         var isGranted = false
 
-        if (isInstalled) {
-            try {
-                isRunning = Shizuku.pingBinder()
-                if (isRunning) {
-                    isPreV11 = Shizuku.isPreV11()
-                    version = Shizuku.getVersion()
-                    isGranted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-                }
-            } catch (_: Throwable) {
-                isRunning = false
+        // 1. Direct Ping: Always test if Shizuku binder is alive first
+        try {
+            isRunning = Shizuku.pingBinder()
+            if (isRunning) {
+                isPreV11 = Shizuku.isPreV11()
+                version = Shizuku.getVersion()
+                isGranted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
             }
+        } catch (_: Throwable) {
+            isRunning = false
         }
 
+        // 2. Installed status: true if running, or if package exists, or launch intent resolves
+        val isInstalled = isRunning || checkShizukuInstalled()
+
         val message = when {
-            !isInstalled -> "Shizuku is not installed. Install Shizuku to authorize ADB system settings."
-            !isRunning -> "Shizuku service is not running. Start via Wireless Debugging."
-            !isGranted -> "Shizuku permission not granted. Tap 'Authorize' to grant."
-            else -> "Shizuku authorized (v$version). Wireless Debugging active."
+            !isInstalled -> "Shizuku is not installed. Tap 'Install / Open' to setup Shizuku."
+            !isRunning -> "Shizuku app detected but service is stopped. Open Shizuku and start via Wireless Debugging."
+            !isGranted -> "Shizuku service is active! Tap 'Authorize' to grant ADB system access."
+            else -> "Shizuku authorized (v$version). Wireless Debugging active & ready."
         }
 
         _status.value = ShizukuStatus(
@@ -91,23 +92,71 @@ class ShizukuManager(private val context: Context) {
     }
 
     private fun checkShizukuInstalled(): Boolean {
-        return try {
+        // Check 1: Direct ping
+        try {
+            if (Shizuku.pingBinder()) return true
+        } catch (_: Throwable) {
+        }
+
+        // Check 2: PackageManager lookup
+        try {
             context.packageManager.getPackageInfo("moe.shizuku.privileged.api", 0)
-            true
-        } catch (_: PackageManager.NameNotFoundException) {
-            false
+            return true
+        } catch (_: Throwable) {
+        }
+
+        // Check 3: Launch Intent
+        try {
+            val intent = context.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
+            if (intent != null) return true
+        } catch (_: Throwable) {
+        }
+
+        return false
+    }
+
+    fun requestPermission(): Boolean {
+        updateStatus()
+        try {
+            if (Shizuku.pingBinder()) {
+                if (Shizuku.isPreV11()) {
+                    return false
+                }
+                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    updateStatus()
+                    return true
+                }
+                Shizuku.requestPermission(REQUEST_CODE_SHIZUKU)
+                return true
+            } else {
+                updateStatus()
+                return false
+            }
+        } catch (_: Throwable) {
+            updateStatus()
+            return false
         }
     }
 
-    fun requestPermission() {
-        if (!_status.value.isRunning) return
-        try {
-            if (Shizuku.isPreV11()) {
-                // Pre-v11 not supported
+    fun openShizukuApp(ctx: Context = context): Boolean {
+        return try {
+            val intent = ctx.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
+            if (intent != null) {
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                ctx.startActivity(intent)
+                true
             } else {
-                Shizuku.requestPermission(REQUEST_CODE_SHIZUKU)
+                val webIntent = android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse("https://shizuku.rikka.app/")
+                ).apply {
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                ctx.startActivity(webIntent)
+                false
             }
         } catch (_: Throwable) {
+            false
         }
     }
 
