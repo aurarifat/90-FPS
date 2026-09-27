@@ -20,8 +20,10 @@
 ---
 
 ### 📦 Assets & Downloads
-- `90FPSBooster-v1.1.0.apk`: Full production application package.
-- `90FPSBooster-v1.1.0.apk.sha256`: SHA-256 verification hash.
+- `90FPSBooster-v1.1.0.apk`: Full production application package (~23 MB).
+- `90FPSBooster-v1.1.0.apk.sha256`: SHA-256 verification hash for APK.
+- `90FPSBooster-v1.1.0-source-code.zip`: Complete Source Code archive bundle (~712 KB).
+- `90FPSBooster-v1.1.0-source-code.zip.sha256`: SHA-256 verification hash for Source Code.
 
 ---
 

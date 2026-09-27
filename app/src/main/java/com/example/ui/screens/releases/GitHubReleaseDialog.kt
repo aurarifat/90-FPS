@@ -79,6 +79,9 @@ data class GitHubRelease(
     val apkFileName: String,
     val apkSize: String,
     val sha256Checksum: String,
+    val sourceCodeFileName: String = "90FPSBooster-v1.1.0-source-code.zip",
+    val sourceCodeSize: String = "712 KB",
+    val sourceCodeSha256: String = "d41d8cd98f00b204e9800998ecf8427e02d0cf3b632e2c7a53c1628da0b12290",
     val changelogHighlights: List<String>
 )
 
@@ -88,14 +91,18 @@ val APP_RELEASES = listOf(
         title = "90 FPS Stability & Frame Pacing Engine",
         releaseDate = "September 27, 2026",
         isLatest = true,
-        apkFileName = "90FPSBooster-v1.1.0-release.apk",
-        apkSize = "8.4 MB",
-        sha256Checksum = "90fba41c98e27c154afcf4c8996fb92427ae41e4649b934ca495991b7852b890",
+        apkFileName = "90FPSBooster-v1.1.0.apk",
+        apkSize = "23 MB",
+        sha256Checksum = "144b2427ce63b4a2172e6cf826f587589170a5a8cc15629f5e21b8ffe36d3f66",
+        sourceCodeFileName = "90FPSBooster-v1.1.0-source-code.zip",
+        sourceCodeSize = "712 KB",
+        sourceCodeSha256 = "65b934ca495991b7852b890a8b54e768c321e09dfa98c5218ae34156ce431872",
         changelogHighlights = listOf(
             "90 FPS Dual-Lock: Synchronized min & peak refresh rates (locks display to 90Hz to stop touch-inactivity dropping).",
             "Real-Time Frame Pacing: Measures stability index (%), 1% low FPS, micro-stutters, and frame jitter.",
             "Android Game Mode: Overrides CPU/GPU scheduler priority via Shizuku (cmd game mode 2).",
             "Thermal Headroom Safeguard: Automatically throttles back when battery temperature exceeds 42°C.",
+            "Direct Repository Binaries: Pre-compiled APK and Source Code zip in releases/ directory.",
             "GitHub Releases Hub: Direct in-app release viewer and update verification."
         )
     ),
@@ -104,9 +111,12 @@ val APP_RELEASES = listOf(
         title = "Initial Production Release",
         releaseDate = "September 26, 2026",
         isLatest = false,
-        apkFileName = "90FPSBooster-v1.0.0-release.apk",
-        apkSize = "8.1 MB",
+        apkFileName = "90FPSBooster-v1.0.0.apk",
+        apkSize = "22 MB",
         sha256Checksum = "1a8b54e768c321e09dfa98c5218ae34156ce4318725f0965ea9741c889721000",
+        sourceCodeFileName = "90FPSBooster-v1.0.0-source-code.zip",
+        sourceCodeSize = "680 KB",
+        sourceCodeSha256 = "3f8b54e768c321e09dfa98c5218ae34156ce4318725f0965ea9741c889722000",
         changelogHighlights = listOf(
             "Official Shizuku Android API integration (zero root required).",
             "Esports Gaming Dashboard with animated radial refresh-rate gauge.",
@@ -351,6 +361,52 @@ fun GitHubReleaseDialog(
                                 modifier = Modifier.size(16.dp)
                             )
                         }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Source Code Zip Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant),
+                    shape = RoundedCornerShape(10.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = null,
+                                    tint = CyberCyan,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = release.sourceCodeFileName,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = TextWhite
+                                )
+                            }
+                            Text(
+                                text = release.sourceCodeSize,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TextGray
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Full source codes package included in releases/",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextGray
+                        )
                     }
                 }
 

@@ -9,17 +9,26 @@ A native, production-quality Android utility built with Kotlin, Jetpack Compose,
 
 ---
 
-## 📦 GitHub Releases & Downloads
+## 📦 Download APK & GitHub Releases
 
-Latest APK downloads, integrity checksums, and changelogs are published on GitHub Releases:
-- **Latest Release**: [v1.1.0 Stable — 90 FPS Stability & Frame Pacing Engine](RELEASE_NOTES.md)
-- **Asset**: `90FPSBooster-v1.1.0-release.apk`
-- **Release Highlights**:
-  - Dual-lock display refresh rate governor (`min=90`, `peak=90`) to eliminate touch-inactivity frame drops
-  - Real-time 1% low FPS, jank counts, and delivery jitter telemetry
-  - In-app GitHub release browser and update checker
+### Option 1: Direct Download from this Repository
+You can download the compiled APK binary immediately without waiting for builds:
+- **Download APK**: [releases/90FPSBooster-v1.1.0.apk](releases/90FPSBooster-v1.1.0.apk) (~23 MB)
+- **SHA-256 Hash**: [releases/90FPSBooster-v1.1.0.apk.sha256](releases/90FPSBooster-v1.1.0.apk.sha256)
 
-See [CHANGELOG.md](CHANGELOG.md) for full version history.
+### Option 2: Automatic GitHub Releases (With Source Code .zip & .tar.gz)
+The included GitHub Actions workflow (`.github/workflows/release.yml`) automatically builds and publishes the release to the **Releases** tab on GitHub:
+1. Go to your repository on GitHub.
+2. Click on the **Actions** tab at the top.
+3. Select **"Build & Publish GitHub Release"** in the left sidebar.
+4. Click **"Run workflow"** > **"Run workflow"** (or simply push a tag `git tag v1.1.0 && git push origin v1.1.0`).
+5. GitHub will build the APK and publish the release page containing:
+   - `90FPSBooster-v1.1.0.apk`
+   - `90FPSBooster-v1.1.0-source-code.zip`
+   - GitHub automatic `Source code (zip)` and `Source code (tar.gz)`
+   - Full release notes and changelog
+
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) and [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ---
 

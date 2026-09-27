@@ -88,7 +88,9 @@ class PerformanceSampler(private val context: Context) {
                     // 1% Low is the average of the worst 1% to 5% longest frame times
                     val worstCount = (sorted.size * 0.05f).toInt().coerceAtLeast(1)
                     val worstAvgDuration = sorted.take(worstCount).average().toFloat()
-                    current1PercentLow = if (worstAvgDuration > 0f) (1000f / worstAvgDuration).coerceIn(10f, currentCalculatedFps) else currentCalculatedFps * 0.85f
+                    val maxFps = currentCalculatedFps.coerceAtLeast(0f)
+                    val raw1Low = if (worstAvgDuration > 0f) (1000f / worstAvgDuration) else maxFps * 0.85f
+                    current1PercentLow = raw1Low.coerceIn(0f, maxFps)
 
                     // Stability index: percentage of frames delivered within ±25% of expected interval
                     val avgTime = samples.average().toFloat()
